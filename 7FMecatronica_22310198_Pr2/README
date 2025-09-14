@@ -1,0 +1,5 @@
+El chat tiene 3 líneas precargadas en knowledge_base.json.
+
+Cuando el usuario escribe algo que no está en la base, el bot pregunta la respuesta y la guarda para la próxima vez.
+
+Cada nueva entrada se guarda automáticamente en el archivo JSON.
