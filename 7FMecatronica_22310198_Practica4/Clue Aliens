@@ -1,0 +1,478 @@
+# -*- coding: utf-8 -*-
+"""
+CLUE: Infección Xenomorph — GUI Retro (tkinter)
+Autor: tú :)
+Python 3.9+ | Sin dependencias externas.
+
+• Interfaz con estilo "terminal vieja escuela" (verde/negro, monospace).
+• Botones: Ficha, Alibi, Arma, Comportamiento, Logs, Sospechas, Acusar, Salir.
+• Dificultad por botones (Fácil/Normal/Difícil) antes de jugar.
+• Toda la mecánica del juego original (cronologías, evidencias, logs, red herrings,
+  sospechas, límite de preguntas y acusación final) en flujo gráfico.
+
+Sugerencia:
+- Ancho mínimo de ventana 900x650 para mejor lectura.
+"""
+
+import random
+import textwrap
+import time
+import tkinter as tk
+from tkinter import ttk, messagebox
+
+# ---------------- Configuración opcional ----------------
+SEED = None   # Pon un número si deseas reproducibilidad (ej. 42)
+WRAP = 92     # Ancho "visual" del texto en el terminal
+PAUSE = 0.0   # Efecto de ligera pausa al escribir (0 = sin pausa)
+
+if SEED is not None:
+    random.seed(SEED)
+
+# ---------------- Datos base ----------------
+PERSONAJES = [
+    ("Dr. Voss", "Biólogo Xenogenético"),
+    ("Capitana Reyna Holt", "Comandante Militar"),
+    ("Ingeniero Kael", "Técnico de sistemas"),
+    ("Oficial Mira Tanaka", "Comunicaciones"),
+    ("Dr. Isaac Renn", "Médico de la nave"),
+]
+
+LOCACIONES = [
+    "Laboratorio de contención",
+    "Puente de mando",
+    "Bahía de carga",
+    "Dormitorio criogénico",
+    "Cocina / comedor",
+]
+
+ARMAS = [
+    "Lanza-plasma",
+    "Llave inglesa industrial",
+    "Inyector de ácido",
+    "Cuchillo quirúrgico",
+    "Parásito Xenomorph",
+]
+
+HISTORIAS = [
+    "El Laboratorio Sellado",
+    "Señal en el Puente",
+    "El Inyector Perdido",
+    "Sombras en la Bahía",
+    "La Última Cena",
+]
+
+RASGOS = [
+    "manos temblorosas",
+    "olor a desinfectante",
+    "manchas de ácido en la ropa",
+    "mirada evasiva",
+    "voz entrecortada",
+    "rasguños recientes",
+    "olores a ozono/quemado",
+    "guantes quirúrgicos en el bolsillo",
+]
+
+HORAS = ["22:00", "23:30", "00:15", "01:05", "02:20"]
+
+# ---------------- Generación de partida ----------------
+def generar_partida():
+    culpable, _ = random.choice(PERSONAJES)
+    arma = random.choice(ARMAS)
+    lugar = random.choice(LOCACIONES)
+    historia = random.choice(HISTORIAS)
+
+    dossier = {}
+    for nombre, profesion in PERSONAJES:
+        rasgo = random.choice(RASGOS)
+        nervios = random.choice(["sereno", "nervioso", "irritable"])
+        cronologia = {}
+        for h in HORAS:
+            cronologia[h] = random.choice(LOCACIONES)
+        if nombre == culpable:
+            h = random.choice(HORAS)
+            cronologia[h] = lugar
+
+        evidencia = []
+        if random.random() < 0.6:
+            evidencia.append(rasgo)
+        if random.random() < 0.45:
+            evidencia.append(
+                f"residuo en botas de '{random.choice(['moco negro', 'ácido seco', 'lubricante'])}'"
+            )
+        if random.random() < 0.35:
+            evidencia.append(f"registro de acceso tardío a {random.choice(LOCACIONES)}")
+
+        dossier[nombre] = {
+            "profesion": profesion,
+            "rasgo": rasgo,
+            "temple": nervios,
+            "cronologia": cronologia,
+            "evidencia": evidencia,
+            "sospecha": 0,
+        }
+
+    logs = []
+    logs.append(f"[LOG] 23:41: Alarma menor: variación térmica en {random.choice(LOCACIONES)}.")
+    logs.append(f"[LOG] 00:03: Intento fallido de override en puerta del {random.choice(LOCACIONES)}.")
+    logs.append(f"[LOG] 01:12: Bioseñal irregular detectada cerca de {lugar}.")
+    logs.append(f"[LOG] 01:59: Cámara 3 muestra sombra con objeto similar a '{arma}'.")
+    logs.append(f"[LOG] 02:14: Señal de interferencia: posible origen biológico.")
+    logs.append(f"[LOG] 00:15: Credencial registrada: {culpable} accede a {lugar}.")
+    if arma != "Parásito Xenomorph":
+        logs.append(f"[LOG] 01:05: Armario de '{arma}' quedó mal cerrado en {lugar}.")
+
+    red_herrings = [
+        f"[LOG] 23:30: {random.choice([n for n,_ in PERSONAJES if n!=culpable])} solicita acceso denegado a {random.choice(LOCACIONES)}.",
+        f"[LOG] 00:52: Sensor indica ruido de pasos cerca de {random.choice(LOCACIONES)}.",
+        f"[LOG] 01:20: Calor residual en pasillo contiguo a {random.choice(LOCACIONES)}.",
+    ]
+
+    return {
+        "culpable": culpable,
+        "arma": arma,
+        "lugar": lugar,
+        "historia": historia,
+        "dossier": dossier,
+        "logs": logs,
+        "red_herrings": red_herrings,
+    }
+
+# ---------------- GUI ----------------
+class RetroClueApp:
+    def __init__(self, root: tk.Tk):
+        self.root = root
+        self.root.title("CLUE: Infección Xenomorph — Terminal")
+        self.root.geometry("960x680")
+        self.root.minsize(900, 640)
+
+        # Colores/estilo retro
+        self.bg = "#0a0f0a"       # negro verdoso
+        self.fg = "#00ff66"       # verde fósforo
+        self.dim = "#00cc55"      # verde tenue
+        self.accent = "#66ffaa"
+        self.font = ("Consolas", 11)
+
+        self.root.configure(bg=self.bg)
+        style = ttk.Style(self.root)
+        style.theme_use("clam")
+        style.configure("Retro.TButton",
+                        font=("Consolas", 10, "bold"),
+                        foreground=self.bg,
+                        background=self.fg,
+                        padding=8)
+        style.map("Retro.TButton",
+                  background=[("active", self.accent)],
+                  foreground=[("active", self.bg)])
+        style.configure("Retro.TLabelframe", background=self.bg, foreground=self.fg)
+        style.configure("Retro.TLabelframe.Label", background=self.bg, foreground=self.fg, font=("Consolas", 12, "bold"))
+        style.configure("Retro.TLabel", background=self.bg, foreground=self.fg, font=self.font)
+
+        # Área "terminal"
+        self.text = tk.Text(self.root, bg=self.bg, fg=self.fg, insertbackground=self.fg,
+                            font=self.font, wrap="word")
+        self.text.pack(side="left", fill="both", expand=True, padx=(12, 6), pady=12)
+        self.text.tag_configure("dim", foreground=self.dim)
+        self.text.tag_configure("accent", foreground=self.accent)
+        self.scroll = ttk.Scrollbar(self.root, command=self.text.yview)
+        self.text["yscrollcommand"] = self.scroll.set
+        self.scroll.pack(side="left", fill="y", pady=12)
+
+        # Panel derecho (controles)
+        right = ttk.Frame(self.root, style="Retro.TLabelframe")
+        right.pack(side="right", fill="y", padx=(6, 12), pady=12)
+
+        # Selecciones rápidas
+        self.var_personaje = tk.StringVar(value=PERSONAJES[0][0])
+        self.var_hora = tk.StringVar(value=HORAS[0])
+
+        ttk.Label(right, text="Personaje:", style="Retro.TLabel").pack(anchor="w", pady=(4, 0))
+        self.cmb_personaje = ttk.Combobox(right, values=[n for n,_ in PERSONAJES],
+                                          textvariable=self.var_personaje, state="readonly")
+        self.cmb_personaje.pack(fill="x", pady=4)
+
+        ttk.Label(right, text="Hora:", style="Retro.TLabel").pack(anchor="w", pady=(6, 0))
+        self.cmb_hora = ttk.Combobox(right, values=HORAS, textvariable=self.var_hora, state="readonly")
+        self.cmb_hora.pack(fill="x", pady=4)
+
+        ttk.Separator(right).pack(fill="x", pady=8)
+
+        # Botones de acciones
+        buttons = [
+            ("Ficha", self.on_ficha),
+            ("Alibi", self.on_alibi),
+            ("Arma", self.on_arma),
+            ("Comportamiento", self.on_comp),
+            ("Logs IA", self.on_logs),
+            ("Sospechas", self.on_sospechas),
+            ("Acusar", self.on_acusar),
+            ("Salir", self.on_salir),
+        ]
+        for text_btn, cmd in buttons:
+            b = ttk.Button(right, text=text_btn, command=cmd, style="Retro.TButton")
+            b.pack(fill="x", pady=5)
+
+        ttk.Separator(right).pack(fill="x", pady=8)
+
+        self.lbl_status = ttk.Label(right, text="Preguntas: —", style="Retro.TLabel")
+        self.lbl_status.pack(anchor="w", pady=(6, 0))
+
+        # Cursor parpadeante (decorativo)
+        self.cursor_visible = True
+        self._blink()
+
+        # Estado del juego
+        self.partida = None
+        self.dificultad = None
+        self.preguntas = 0
+
+        # Inicio
+        self._intro()
+        self._ask_difficulty()
+
+    # -------- Utilidades de UI --------
+    def _blink(self):
+        # Simula un cursor parpadeante en la esquina superior izquierda
+        self.cursor_visible = not self.cursor_visible
+        try:
+            self.root.after(600, self._blink)
+        except tk.TclError:
+            pass
+
+    def clear(self):
+        self.text.config(state="normal")
+        self.text.delete("1.0", "end")
+
+    def append(self, s="", tag=None, end="\n"):
+        self.text.config(state="normal")
+        for line in textwrap.fill(s, WRAP).splitlines() if s else [""]:
+            self.text.insert("end", line, tag)
+            self.text.insert("end", end)
+            if PAUSE:
+                self.text.update_idletasks()
+                time.sleep(PAUSE)
+        self.text.see("end")
+        self.text.config(state="disabled")
+
+    def banner(self, title):
+        self.append("-" * 64)
+        self.append(title.upper().center(64))
+        self.append("-" * 64)
+
+    def update_status(self):
+        self.lbl_status.config(text=f"Preguntas: {self.preguntas}")
+
+    # -------- Flujo del juego --------
+    def _intro(self):
+        self.clear()
+        self.banner("clue: infección xenomorph — Erebus IV")
+        self.append("Una muerte (¿o algo peor?) ha ocurrido en la nave *Erebus IV*.")
+        self.append("La IA bloqueó las compuertas. Descubre quién es el culpable, con qué arma y dónde ocurrió.")
+        self.append()
+
+    def _ask_difficulty(self):
+        self.append("Elige dificultad:", "accent")
+        self.append(" [F1] Fácil   — 10 preguntas, 0 pistas falsas, +2 pistas de IA")
+        self.append(" [F2] Normal  — 7  preguntas, 1 pista falsa,  +1 pista de IA")
+        self.append(" [F3] Difícil — 6  preguntas, 2 pistas falsas, +0 pistas de IA")
+        self.append()
+        # Botonera emergente
+        top = tk.Toplevel(self.root)
+        top.title("Dificultad")
+        top.configure(bg=self.bg)
+        ttk.Label(top, text="Selecciona dificultad", style="Retro.TLabel").pack(padx=16, pady=(16, 8))
+        row = ttk.Frame(top, style="Retro.TLabelframe"); row.pack(padx=16, pady=(0, 16))
+        ttk.Button(row, text="Fácil", style="Retro.TButton",
+                   command=lambda: self._set_difficulty(top, 1)).grid(row=0, column=0, padx=6, pady=6)
+        ttk.Button(row, text="Normal", style="Retro.TButton",
+                   command=lambda: self._set_difficulty(top, 2)).grid(row=0, column=1, padx=6, pady=6)
+        ttk.Button(row, text="Difícil", style="Retro.TButton",
+                   command=lambda: self._set_difficulty(top, 3)).grid(row=0, column=2, padx=6, pady=6)
+        # Bloquear interacción con ventana principal hasta elegir
+        top.transient(self.root); top.grab_set(); self.root.wait_window(top)
+
+    def _set_difficulty(self, win, d_level:int):
+        if d_level == 1:
+            self.dificultad = {"preguntas": 10, "falsas": 0, "pista_auto": 2}
+        elif d_level == 2:
+            self.dificultad = {"preguntas": 7, "falsas": 1, "pista_auto": 1}
+        else:
+            self.dificultad = {"preguntas": 6, "falsas": 2, "pista_auto": 0}
+        win.destroy()
+        self.start_game()
+
+    def start_game(self):
+        self.partida = generar_partida()
+        self.preguntas = self.dificultad["preguntas"]
+        self.update_status()
+
+        self.append(f"Historia seleccionada: {self.partida['historia']}", "accent")
+        self.append("Tu objetivo: acertar CULPABLE, ARMA y LOCACIÓN.")
+        self.append()
+
+        self.banner("Tripulación")
+        for n, prof in PERSONAJES:
+            self.append(f"- {n} — {prof}")
+        self.append()
+        self.append(f"Tienes {self.preguntas} preguntas antes de acusar. ¡Úsalas bien!", "accent")
+
+    # -------- Acciones --------
+    def _consume(self, how_many=1):
+        if how_many > 0:
+            self.preguntas = max(0, self.preguntas - how_many)
+            self.update_status()
+            if self.preguntas == 0:
+                self.append()
+                self.append("Se acabaron tus preguntas. Debes ACUSAR ahora.", "accent")
+
+    def on_ficha(self):
+        if not self.partida: return
+        nombre = self.var_personaje.get()
+        d = self.partida["dossier"][nombre]
+        self.banner(f"Ficha — {nombre}")
+        self.append(f"Nombre: {nombre} — Profesión: {d['profesion']}")
+        self.append(f"Comportamiento observado: {d['temple']} | Rasgo visible: {d['rasgo']}")
+        if d["evidencia"]:
+            self.append("Evidencias visibles: " + "; ".join(d["evidencia"]))
+        else:
+            self.append("Evidencias visibles: (sin datos)")
+        self.append("Cronología (horas clave):")
+        for h in HORAS:
+            self.append(f"  {h}: {d['cronologia'][h]}")
+        self._consume(1)
+
+    def on_alibi(self):
+        if not self.partida: return
+        nombre = self.var_personaje.get()
+        h = self.var_hora.get()
+        d = self.partida["dossier"][nombre]
+        loc = d["cronologia"][h]
+        self.banner("Interrogatorio — Alibi")
+        self.append(f"{nombre}: A las {h} estuve en '{loc}'.")
+        if loc == self.partida["lugar"] and h in ("00:15", "01:05", "01:12"):
+            d["sospecha"] += 2
+            self.append("(Tu instinto: esto aumenta la sospecha...)", "dim")
+        self._consume(1)
+
+    def on_arma(self):
+        if not self.partida: return
+        nombre = self.var_personaje.get()
+        arma = random.choice(ARMAS)
+        if nombre == self.partida["culpable"] and random.random() < 0.5:
+            arma = self.partida["arma"]
+        self.banner("Interrogatorio — Arma")
+        self.append(f"{nombre}: Vi algo como '{arma}' cerca de {random.choice(LOCACIONES)}.")
+        if arma == self.partida["arma"]:
+            self.partida["dossier"][nombre]["sospecha"] += 1
+        self._consume(1)
+
+    def on_comp(self):
+        if not self.partida: return
+        nombre = self.var_personaje.get()
+        d = self.partida["dossier"][nombre]
+        self.banner("Observación — Comportamiento")
+        self.append(f"Observas a {nombre}: {d['temple']} — rasgo: {d['rasgo']}")
+        claves = ("ácido", "guantes", "rasguños")
+        if any(k in d["rasgo"] for k in claves) or any(any(k in ev for k in claves) for ev in d["evidencia"]):
+            d["sospecha"] += 1
+            self.append("(Esa pista te parece incriminatoria)", "dim")
+        self._consume(1)
+
+    def on_logs(self):
+        if not self.partida: return
+        self.banner("Registros de IA")
+        base = list(self.partida["logs"])
+        if self.dificultad["falsas"] > 0:
+            base += random.sample(self.partida["red_herrings"], k=self.dificultad["falsas"])
+        for log in base:
+            self.append(log)
+
+        if self.dificultad["pista_auto"] > 0 and random.random() < 0.7:
+            pista = random.choice([
+                f"Alguien accedió al {self.partida['lugar']} cerca de la medianoche.",
+                f"El arma '{self.partida['arma']}' fue manipulada antes del incidente.",
+                f"Una bioseñal anómala persistió junto a {self.partida['lugar']} tras el cierre.",
+            ])
+            self.append("\n[Pista de IA] " + pista, "accent")
+            self.dificultad["pista_auto"] -= 1
+        self._consume(1)
+
+    def on_sospechas(self):
+        if not self.partida: return
+        self.banner("Sospechas actuales")
+        data = sorted(
+            [(n, d["sospecha"]) for n, d in self.partida["dossier"].items()],
+            key=lambda x: -x[1]
+        )
+        for n, s in data:
+            self.append(f"{n:22s}  sospecha = {s}")
+        self.append("(Ver sospechas no consume pregunta)", "dim")
+
+    def on_acusar(self):
+        if not self.partida: return
+        self._accuse_dialog()
+
+    def _accuse_dialog(self):
+        top = tk.Toplevel(self.root)
+        top.title("Acusación Final")
+        top.configure(bg=self.bg)
+        style = ttk.Style(top); style.theme_use("clam")
+        style.configure("Retro.TLabel", background=self.bg, foreground=self.fg, font=self.font)
+        style.configure("Retro.TButton", font=("Consolas", 10, "bold"),
+                        foreground=self.bg, background=self.fg, padding=8)
+
+        ttk.Label(top, text="Selecciona Culpable, Arma y Lugar", style="Retro.TLabel").pack(padx=16, pady=(16, 8))
+
+        v_c = tk.StringVar(value=[n for n,_ in PERSONAJES][0])
+        v_a = tk.StringVar(value=ARMAS[0])
+        v_l = tk.StringVar(value=LOCACIONES[0])
+
+        frm = ttk.Frame(top, style="Retro.TLabelframe"); frm.pack(padx=16, pady=8, fill="x")
+        ttk.Label(frm, text="Culpable:", style="Retro.TLabel").grid(row=0, column=0, sticky="w", padx=4, pady=4)
+        cb1 = ttk.Combobox(frm, values=[n for n,_ in PERSONAJES], textvariable=v_c, state="readonly")
+        cb1.grid(row=0, column=1, sticky="ew", padx=4, pady=4)
+
+        ttk.Label(frm, text="Arma:", style="Retro.TLabel").grid(row=1, column=0, sticky="w", padx=4, pady=4)
+        cb2 = ttk.Combobox(frm, values=ARMAS, textvariable=v_a, state="readonly")
+        cb2.grid(row=1, column=1, sticky="ew", padx=4, pady=4)
+
+        ttk.Label(frm, text="Lugar:", style="Retro.TLabel").grid(row=2, column=0, sticky="w", padx=4, pady=4)
+        cb3 = ttk.Combobox(frm, values=LOCACIONES, textvariable=v_l, state="readonly")
+        cb3.grid(row=2, column=1, sticky="ew", padx=4, pady=4)
+        frm.columnconfigure(1, weight=1)
+
+        btns = ttk.Frame(top); btns.pack(pady=12)
+        ttk.Button(btns, text="Confirmar", style="Retro.TButton",
+                   command=lambda: self._resolve_accuse(top, v_c.get(), v_a.get(), v_l.get())).grid(row=0, column=0, padx=6)
+        ttk.Button(btns, text="Cancelar", style="Retro.TButton",
+                   command=top.destroy).grid(row=0, column=1, padx=6)
+
+        top.transient(self.root); top.grab_set(); self.root.wait_window(top)
+
+    def _resolve_accuse(self, win, culp, arm, lug):
+        win.destroy()
+        acierto = (culp == self.partida["culpable"] and arm == self.partida["arma"] and lug == self.partida["lugar"])
+        self.append()
+        self.banner("Veredicto")
+        self.append(f"Solución: {self.partida['culpable']} con '{self.partida['arma']}' en '{self.partida['lugar']}'.", "accent")
+        if acierto:
+            self.append("¡ACERTASTE! Reconstruiste el caso con precisión.")
+        else:
+            self.append("No es correcto, pero tu informe permite cerrar el caso.")
+        self.append("\nFIN — La tripulación de la *Erebus IV* no olvidará esta noche...")
+        self.append()
+
+        again = messagebox.askyesno("Partida terminada", "¿Jugar otra vez?")
+        if again:
+            self._intro(); self._ask_difficulty()
+        else:
+            self.root.destroy()
+
+    def on_salir(self):
+        if messagebox.askokcancel("Salir", "¿Cerrar el juego?"):
+            self.root.destroy()
+
+# ---------------- Main ----------------
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = RetroClueApp(root)
+    root.mainloop()

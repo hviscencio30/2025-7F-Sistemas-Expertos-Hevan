@@ -1,0 +1,269 @@
+{
+  "question": "¿Es una película animada?",
+  "yes": {
+    "question": "¿Es de Disney o Pixar?",
+    "yes": {
+      "question": "¿Es de Pixar?",
+      "yes": {
+        "question": "¿Trata sobre juguetes que cobran vida?",
+        "yes": { "movie": "Toy Story" },
+        "no": {
+          "question": "¿Se desarrolla en México durante el Día de Muertos?",
+          "yes": { "movie": "Coco" },
+          "no": {
+            "question": "¿El protagonista es un robot solitario en el espacio?",
+            "yes": { "movie": "WALL·E" },
+            "no": {
+              "question": "¿Explora los sentimientos dentro de la mente de una niña?",
+              "yes": { "movie": "Intensamente (Inside Out)" },
+              "no": {
+                "question": "¿Una familia de superhéroes salva el día?",
+                "yes": { "movie": "Los Increíbles" },
+                "no": {
+                  "question": "¿Un chef… que es una rata?",
+                  "yes": { "movie": "Ratatouille" },
+                  "no": {
+                    "question": "¿Un anciano vuela su casa con globos?",
+                    "yes": { "movie": "Up: Una aventura de altura" },
+                    "no": {
+                      "question": "¿Monstruos que asustan a través de puertas?",
+                      "yes": { "movie": "Monsters, Inc." },
+                      "no": {
+                        "question": "¿Carreras de autos con un coche rojo carismático?",
+                        "yes": { "movie": "Cars" },
+                        "no": {
+                          "question": "¿Música jazz y viaje al más allá?",
+                          "yes": { "movie": "Soul" },
+                          "no": {
+                            "question": "¿Una aventura de peces padre-hijo?",
+                            "yes": { "movie": "Buscando a Nemo" },
+                            "no": { "movie": "Toy Story 3" }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "no": {
+        "question": "¿La protagonista es una princesa clásica de un reino?",
+        "yes": {
+          "question": "¿Vive bajo el mar?",
+          "yes": { "movie": "La Sirenita (1989)" },
+          "no": {
+            "question": "¿Ambientada en la antigua China con una guerrera?",
+            "yes": { "movie": "Mulán" },
+            "no": {
+              "question": "¿Princesa de hielo y su hermana?",
+              "yes": { "movie": "Frozen" },
+              "no": {
+                "question": "¿Princesa polinesia y el océano la llama?",
+                "yes": { "movie": "Moana (Vaiana)" },
+                "no": { "movie": "Aladdín (1992)" }
+              }
+            }
+          }
+        },
+        "no": {
+          "question": "¿Rey de la sabana africana?",
+          "yes": { "movie": "El Rey León" },
+          "no": {
+            "question": "¿Animales antropomorfos en una ciudad moderna?",
+            "yes": { "movie": "Zootopia" },
+            "no": {
+              "question": "¿Superhéroes adolescentes en San Fransokyo?",
+              "yes": { "movie": "Grandes Héroes (Big Hero 6)" },
+              "no": { "movie": "Encanto" }
+            }
+          }
+        }
+      }
+    },
+    "no": {
+      "question": "¿Es de DreamWorks?",
+      "yes": {
+        "question": "¿Un ogro verde y un burro parlante?",
+        "yes": { "movie": "Shrek" },
+        "no": {
+          "question": "¿Un oso aprende kung-fu?",
+          "yes": { "movie": "Kung Fu Panda" },
+          "no": {
+            "question": "¿Dragones y vikingos amigos?",
+            "yes": { "movie": "Cómo entrenar a tu dragón" },
+            "no": { "movie": "Madagascar" }
+          }
+        }
+      },
+      "no": {
+        "question": "¿Es anime japonés?",
+        "yes": {
+          "question": "¿Una niña entra a un mundo de espíritus?",
+          "yes": { "movie": "El viaje de Chihiro" },
+          "no": {
+            "question": "¿Un chico conoce a una criatura peluda gigante?",
+            "yes": { "movie": "Mi vecino Totoro" },
+            "no": { "movie": "Your Name (Kimi no Na wa)" }
+          }
+        },
+        "no": {
+          "question": "¿Superhéroe adolescente con multiverso animado?",
+          "yes": { "movie": "Spider-Man: Un nuevo universo" },
+          "no": { "movie": "La gran aventura LEGO" }
+        }
+      }
+    }
+  },
+  "no": {
+    "question": "¿Es anterior al año 2000?",
+    "yes": {
+      "question": "¿Es un drama/romance súper taquillero de los 90?",
+      "yes": { "movie": "Titanic" },
+      "no": {
+        "question": "¿Dinosaurios clonados dieron inicio a una saga en 1993?",
+        "yes": { "movie": "Jurassic Park" },
+        "no": {
+          "question": "¿Magia y una aventura épica ochentera/noventera?",
+          "yes": { "movie": "La historia sin fin" },
+          "no": { "movie": "Terminator 2: El juicio final" }
+        }
+      }
+    },
+    "no": {
+      "question": "¿Es una película de superhéroes?",
+      "yes": {
+        "question": "¿Es de Marvel (UCM)?",
+        "yes": {
+          "question": "¿El héroe lleva una armadura tecnológica roja/dorada?",
+          "yes": { "movie": "Iron Man (2008)" },
+          "no": {
+            "question": "¿Un equipo se reúne para salvar el mundo en Nueva York?",
+            "yes": { "movie": "Los Vengadores (The Avengers, 2012)" },
+            "no": {
+              "question": "¿Un rey de Wakanda hereda el manto?",
+              "yes": { "movie": "Pantera Negra (Black Panther)" },
+              "no": {
+                "question": "¿Inadaptados espaciales con música setentera?",
+                "yes": { "movie": "Guardianes de la Galaxia" },
+                "no": { "movie": "Spider-Man: No Way Home" }
+              }
+            }
+          }
+        },
+        "no": {
+          "question": "¿Es de DC?",
+          "yes": {
+            "question": "¿Un vigilante de Ciudad Gótica contra el Joker?",
+            "yes": { "movie": "El Caballero de la Noche (The Dark Knight)" },
+            "no": {
+              "question": "¿Una amazona deja Themyscira?",
+              "yes": { "movie": "Mujer Maravilla (Wonder Woman)" },
+              "no": { "movie": "El Hombre de Acero (Man of Steel)" }
+            }
+          },
+          "no": { "movie": "Kick-Ass" }
+        }
+      },
+      "no": {
+        "question": "¿Es de ciencia ficción?",
+        "yes": {
+          "question": "¿Dirigida por James Cameron?",
+          "yes": {
+            "question": "¿Humanos en Pandora, con nativos azules?",
+            "yes": { "movie": "Avatar (2009)" },
+            "no": { "movie": "Aliens (1986)" }
+          },
+          "no": {
+            "question": "¿Robots gigantes contra kaijus?",
+            "yes": { "movie": "Titanes del Pacífico (Pacific Rim)" },
+            "no": {
+              "question": "¿Sueños compartidos y robos de ideas?",
+              "yes": { "movie": "El Origen (Inception)" },
+              "no": {
+                "question": "¿Viaje interestelar y agujeros de gusano?",
+                "yes": { "movie": "Interestelar (Interstellar)" },
+                "no": {
+                  "question": "¿Androides en un futuro lluvioso y neón?",
+                  "yes": { "movie": "Blade Runner 2049" },
+                  "no": {
+                    "question": "¿Realidad simulada con pastillas roja y azul?",
+                    "yes": { "movie": "The Matrix" },
+                    "no": {
+                      "question": "¿Batallas con sables de luz en una galaxia lejana?",
+                      "yes": {
+                        "question": "¿La original de 1977?",
+                        "yes": { "movie": "Star Wars: Una nueva esperanza (Episodio IV)" },
+                        "no": { "movie": "Star Wars: El despertar de la Fuerza (Episodio VII)" }
+                      },
+                      "no": { "movie": "Ex Machina" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "no": {
+          "question": "¿Es fantasía/aventura épica?",
+          "yes": {
+            "question": "¿Hobbits y un anillo único?",
+            "yes": { "movie": "El Señor de los Anillos: La Comunidad del Anillo" },
+            "no": {
+              "question": "¿Magia en un colegio británico?",
+              "yes": { "movie": "Harry Potter y la piedra filosofal" },
+              "no": {
+                "question": "¿Piratas y una maldición en el Caribe?",
+                "yes": { "movie": "Piratas del Caribe: La maldición del Perla Negra" },
+                "no": { "movie": "Las crónicas de Narnia: El león, la bruja y el armario" }
+              }
+            }
+          },
+          "no": {
+            "question": "¿Es de terror?",
+            "yes": {
+              "question": "¿Investigadores paranormales y una casa embrujada?",
+              "yes": { "movie": "El Conjuro" },
+              "no": {
+                "question": "¿Un payaso llamado Pennywise aterroriza un pueblo?",
+                "yes": { "movie": "IT (2017)" },
+                "no": { "movie": "El Aro (The Ring)" }
+              }
+            },
+            "no": {
+              "question": "¿Es romance/drama?",
+              "yes": {
+                "question": "¿Pareja de artistas en Los Ángeles con mucho musical?",
+                "yes": { "movie": "La La Land" },
+                "no": {
+                  "question": "¿Romance clásico en la campiña inglesa (siglo XIX)?",
+                  "yes": { "movie": "Orgullo y Prejuicio (2005)" },
+                  "no": { "movie": "Diario de una pasión (The Notebook)" }
+                }
+              },
+              "no": {
+                "question": "¿Es comedia?",
+                "yes": {
+                  "question": "¿Un niño defiende su casa en Navidad?",
+                  "yes": { "movie": "Mi pobre angelito (Home Alone)" },
+                  "no": {
+                    "question": "¿Un grupo despierta crudo sin recordar nada?",
+                    "yes": { "movie": "¿Qué pasó ayer? (The Hangover)" },
+                    "no": { "movie": "Superbad" }
+                  }
+                },
+                "no": {
+                  "question": "¿Ganó el Óscar a Mejor Película en 2000s y es histórica/épica?",
+                  "yes": { "movie": "Gladiador" },
+                  "no": { "movie": "Forrest Gump" }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
